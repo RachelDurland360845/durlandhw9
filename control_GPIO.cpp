@@ -3,50 +3,72 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-#include <stdio>
-#include <unistd>
 #include <string>
 
-#define LED_PATH "/sys/bus/iio/devices/iio:device0"
+using namespace std;
 
+#define GPIO_PATH "/sys/class/gpio/" 
 
-void writeLED(string name, string value)
+string ledpin;
+
+void writeGPIO(string filename, string value)
 {
-	ofstream ledstream;
-	ledstream.open(LED_PATH.c_str());
-	ledstream << value;
-	ledstream.close();
+  ostringstream sled;
+  sled << "gpio" << filename;
+  string ledpinname = string(sled.str());
+  string ledPath = (GPIO_PATH + ledpinname + "/value");
+
+  fstream fs;
+  string path(ledPath);
+  cout << path << endl;
+  fs.open(path.c_str(), fstream::out);
+  fs << value;
+  fs.close();
 }
 
-string readButton(string name)
+string readGPIO(string pinread)
 {
-	ifstream buttonstream;
-	buttonstream.open(BUTTON_PATH.c_str());
-	string buttonVAL;
-	getline(buttonstream,buttonVAL);
-	buttonstream.close();
-	return buttonVAL;
+  ostringstream sbutton;
+  sbutton << "gpio" << pinread;
+  string buttonpinname = string(sbutton.str());
+  string buttonpath = (GPIO_PATH + buttonpinname + "/value");
+
+
+  ifstream fs;
+  string path(buttonpath);
+  fs.open((path).c_str(),fstream::in);
+  string input;
+  getline(fs,input);
+  fs.close();
+  return input;
 }
-
-writeLED(i )
+int main(int argc, char* argv[])
 {
+    if(argc<=3)
+    {
+        cout << "usage of control_GPIO is LED pin, state, button read pin" << endl;
+	cout << "e.g. 12 high 16" << endl;
+    }
 
-string GPIOout = argv[0];
-string ledVAL = argv[1];
-string GPIOin = argv[2];
+    string ledpin(argv[1]);
+    string cmd(argv[2]);
+    string button(argv[3]);
+    
+    if(cmd == "high")
+    {
+        writeGPIO(ledpin,"1");
+	cout << "turing led on" << endl;
+    }
+    else if (cmd == "low")
+    {
+        writeGPIO(ledpin,"0");
+	cout << "turning led off" << endl;
+    }
+    else
+    {
+        cout << "invalid command" << endl;
+    }
 
-ostringstream LED_PIN;
-LED_PIN << "gpio" << GPIOout;
-string LED_name = string(LED_PIN.str());
-LED_PATH = GPIO_PATH + LED_name + "/";
-
-ostringstream BUTTON_PIN;
-BUTTON_PIN << "gpio" << GPIOin;
-string BUTTON_name = string(LED_BUTTON.str());
-BUTTON_PATH = GPIO_PATH + BUTTON_name + "/";
-
-writeLED(LED_name,ledVAL);
-string buttonVALUE = readButton(BUTTON_name);
-
-
+    string gpioOutput =  readGPIO(button);
+    cout << gpioOutput << endl;
 }

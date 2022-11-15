@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "building durland homework 9"
+g++ control_GPIO.cpp -o control_GPIO
+echo "finished" 
